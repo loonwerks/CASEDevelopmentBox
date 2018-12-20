@@ -1,4 +1,4 @@
-# ssssscoding: utf-8-emacs
+# XXX: Require vagrant-size: vagrant plugin install vagrant-disksize
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
 # configures the configuration version (we support older styles for
 # backwards compatibility). Please don't change it unless you know what
@@ -11,6 +11,7 @@ Vagrant.configure("2") do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
   config.vm.box = "ubuntu/bionic64"
+  config.disksize.size = '80GB'
 
   # Forward ssh key requests to our local agent.
   config.ssh.forward_agent = true
@@ -70,6 +71,8 @@ Vagrant.configure("2") do |config|
     apt-get update
     apt-get -y upgrade
     echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
+    apt-get install -y oracle-java8-installer oracle-java8-set-default
+    echo "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
     pkgs=(
       repo
       curl
@@ -115,11 +118,9 @@ Vagrant.configure("2") do |config|
       texlive-latex-extra
       texlive-metapost
       texlive-bibtex-extra
-      oracle-java8-installer
-      oracle-java8-set-default
       gtk3.0
       libswt-gtk-3-java
-      ldtp
+      unzip
       )
     for i in "${pkgs[@]}"
     do
@@ -131,30 +132,62 @@ Vagrant.configure("2") do |config|
    SHELL
 
   config.vm.provision "shell", privileged: false, inline: <<-SHELL
-    pip install --user setuptools
-    pip install --user sel4-deps
-    pip install --user camkes-deps
     mkdir repos
-    git clone https://github.com/HOL-Theorem-Prover/HOL.git repos/HOL
-    (cd repos/HOL && git checkout 7f7650b1f7d9fbc79f55646dabcf225b5cf0fff4)
-    git clone https://github.com/CakeML/cakeml.git repos/CakeML
-    (cd repos/CakeML && git checkout 59886cd0205c1d5d943ef10a26890f79b515b68f)
     mkdir tarballs
-    (cd tarballs && wget --quiet https://cakeml.org/cake-x64-64.tar.gz)
-    (cd tarballs && wget --quiet https://cakeml.org/cake-x64-32.tar.gz)
-    (cd tarballs && wget --quiet http://mirrors.neusoft.edu.cn/eclipse/oomph/epp/2018-09/Ra/eclipse-inst-linux64.tar.gz)
     mkdir software
-    (cd software && tar -xvzf ../tarballs/cake-x64-64.tar.gz && cd cake-x64-64 && make)
-    (cd software && tar -xvzf ../tarballs/cake-x64-32.tar.gz && cd cake-x64-32 && make)
-    (cd software && tar -zxvf ../tarballs/eclipse-inst-linux64.tar.gz)
-    mkdir dev
-    (cd ~/ && wget -qO- https://www.dropbox.com/s/iv7gxs1scepf3ja/osate2-develop-overlay-17122018.tar.gz?dl=1 | tar zxvf)
-    mkdir repos/camkes
-    (cd repos/camkes && yes | repo init -u https://github.com/seL4/camkes-manifest.git && repo sync)
 
-    # Commented out while developing this script to speed provisioning.
+    # DATA61
+    # pip install --user setuptools
+    # pip install --user sel4-deps
+    # pip install --user camkes-deps
+    # git clone https://github.com/HOL-Theorem-Prover/HOL.git repos/HOL
+    # (cd repos/HOL && git checkout 7f7650b1f7d9fbc79f55646dabcf225b5cf0fff4)
+    # git clone https://github.com/CakeML/cakeml.git repos/CakeML
+    # (cd repos/CakeML && git checkout 59886cd0205c1d5d943ef10a26890f79b515b68f)
+    # (cd tarballs && wget --quiet https://cakeml.org/cake-x64-64.tar.gz)
+    # (cd tarballs && wget --quiet https://cakeml.org/cake-x64-32.tar.gz)
+    # (cd software && tar -xvzf ../tarballs/cake-x64-64.tar.gz && cd cake-x64-64 && make)
+    # (cd software && tar -xvzf ../tarballs/cake-x64-32.tar.gz && cd cake-x64-32 && make
+    # mkdir repos/camkes
+    # (cd repos/camkes && yes | repo init -u https://github.com/seL4/camkes-manifest.git && repo sync)
+    # UNCOMMENTED TO SAVE TIME.
     # (cd repos/HOL && echo 'val polymllibdir = "/usr/lib/x86_64-linux-gnu";' > tools-poly/poly-includes.ML)
     # (cd repos/HOL && poly < tools/smart-configure.sml && bin/build)
+
+
+    # ECLIPSE
+    (cd tarballs &&\
+      wget --quiet http://mirrors.neusoft.edu.cn/eclipse/oomph/epp/2018-09/Ra/eclipse-inst-linux64.tar.gz)
+    (cd software && tar -zxvf ../tarballs/eclipse-inst-linux64.tar.gz)
+    (cd ~/ && wget -qO- https://www.dropbox.com/s/iv7gxs1scepf3ja/osate2-develop-overlay-17122018.tar.gz?dl=1 |\
+       tar zxv)
+
+    # Remove problematic option
+    (cd /home/vagrant/dev/osate2/osate2-develop/eclipse &&\
+     cp eclipse.ini eclipse.ini.orig &&\
+     sed -e '/^-perspective/,+1d' eclipse.ini.orig > eclipse.ini)
+
+   #  eclipse/eclipse -nosplash  -application org.eclipse.cdt.managedbuilder.core.headlessbuild -import ~/repos/sireum-v3/
+
+    #KSU
+    ( cd /home/vagrant/dev/osate2/osate2-develop &&\
+      eclipse/eclipse -nosplash -consoleLog\
+        -application org.eclipse.equinox.p2.director\
+        -repository http://download.scala-ide.org/sdk/lithium/e47/scala212/stable/site\
+        -installIU org.scala-ide.sdt.feature.feature.group )
+    # Requires password
+    # && git clone --recursive https://github.com/santoslab/arsit.git sireum-v3/aadl/arsit
+    (cd /home/vagrant/repos\
+       && git clone --recursive -b master https://github.com/sireum/v3.git sireum-v3\
+       && git clone https://github.com/sireum/air.git sireum-v3/aadl/ir\
+       && git clone https://github.com/sireum/v3-awas.git sireum-v3/awas\
+       && ./sireum-v3/bin/sbt-launch.sh assembly\
+       && mkdir -p /home/vagrant/dev/osate2/osate2-develop/eclipse/org.sireum/lib\
+       && cp sireum-v3/bin/sireum.jar /home/vagrant/dev/osate2/osate2-develop/eclipse/org.sireum/lib)
+
+    # Restore problematic option
+    ( cd /home/vagrant/dev/osate2/osate2-develop/eclipse &&\
+      cp eclipse.ini.orig eclipse.ini)
 
     echo '' >> ~/.bashrc
     echo 'export PATH=${PATH}:${PWD}/dev/cake-x64-64/:${PWD}/repos/HOL/bin:' >> ~/.bashrc
