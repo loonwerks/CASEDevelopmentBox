@@ -136,22 +136,22 @@ Vagrant.configure("2") do |config|
     mkdir software
 
     # DATA61
-    # pip install --user setuptools
-    # pip install --user sel4-deps
-    # pip install --user camkes-deps
-    # git clone https://github.com/HOL-Theorem-Prover/HOL.git repos/HOL
-    # (cd repos/HOL && git checkout 7f7650b1f7d9fbc79f55646dabcf225b5cf0fff4)
-    # git clone https://github.com/CakeML/cakeml.git repos/CakeML
-    # (cd repos/CakeML && git checkout 59886cd0205c1d5d943ef10a26890f79b515b68f)
-    # (cd tarballs && wget --quiet https://cakeml.org/cake-x64-64.tar.gz)
-    # (cd tarballs && wget --quiet https://cakeml.org/cake-x64-32.tar.gz)
-    # (cd software && tar -xvzf ../tarballs/cake-x64-64.tar.gz && cd cake-x64-64 && make)
-    # (cd software && tar -xvzf ../tarballs/cake-x64-32.tar.gz && cd cake-x64-32 && make
-    # mkdir repos/camkes
-    # (cd repos/camkes && yes | repo init -u https://github.com/seL4/camkes-manifest.git && repo sync)
+    pip install --user setuptools
+    pip install --user sel4-deps
+    pip install --user camkes-deps
+    git clone https://github.com/HOL-Theorem-Prover/HOL.git repos/HOL
+    (cd repos/HOL && git checkout 7f7650b1f7d9fbc79f55646dabcf225b5cf0fff4)
+    git clone https://github.com/CakeML/cakeml.git repos/CakeML
+    (cd repos/CakeML && git checkout 59886cd0205c1d5d943ef10a26890f79b515b68f)
+    (cd tarballs && wget --quiet https://cakeml.org/cake-x64-64.tar.gz)
+    (cd tarballs && wget --quiet https://cakeml.org/cake-x64-32.tar.gz)
+    (cd software && tar -xvzf ../tarballs/cake-x64-64.tar.gz && cd cake-x64-64 && make)
+    (cd software && tar -xvzf ../tarballs/cake-x64-32.tar.gz && cd cake-x64-32 && make
+    mkdir repos/camkes
+    (cd repos/camkes && yes | repo init -u https://github.com/seL4/camkes-manifest.git && repo sync)
     # UNCOMMENTED TO SAVE TIME.
-    # (cd repos/HOL && echo 'val polymllibdir = "/usr/lib/x86_64-linux-gnu";' > tools-poly/poly-includes.ML)
-    # (cd repos/HOL && poly < tools/smart-configure.sml && bin/build)
+    (cd repos/HOL && echo 'val polymllibdir = "/usr/lib/x86_64-linux-gnu";' > tools-poly/poly-includes.ML)
+    (cd repos/HOL && poly < tools/smart-configure.sml && bin/build)
 
 
     # ECLIPSE
