@@ -175,15 +175,6 @@ Vagrant.configure("2") do |config|
         -application org.eclipse.equinox.p2.director\
         -repository http://download.scala-ide.org/sdk/lithium/e47/scala212/stable/site\
         -installIU org.scala-ide.sdt.feature.feature.group )
-    # Requires password
-    # && git clone --recursive https://github.com/santoslab/arsit.git sireum-v3/aadl/arsit
-    (cd /home/vagrant/repos\
-       && git clone --recursive -b master https://github.com/sireum/v3.git sireum-v3\
-       && git clone https://github.com/sireum/air.git sireum-v3/aadl/ir\
-       && git clone https://github.com/sireum/v3-awas.git sireum-v3/awas\
-       && ./sireum-v3/bin/sbt-launch.sh assembly\
-       && mkdir -p /home/vagrant/dev/osate2/osate2-develop/eclipse/org.sireum/lib\
-       && cp sireum-v3/bin/sireum.jar /home/vagrant/dev/osate2/osate2-develop/eclipse/org.sireum/lib)
 
     # Restore problematic option
     ( cd /home/vagrant/dev/osate2/osate2-develop/eclipse &&\
